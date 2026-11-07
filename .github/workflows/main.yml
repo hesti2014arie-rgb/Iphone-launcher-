@@ -1,0 +1,61 @@
+name: Build IP-LAUNCHER APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Buka zip dan cari proyek
+        run: |
+          find . -maxdepth 2 -type f -not -path "./.git/*" -not -path "./.github/*" | while read -r f; do
+            if unzip -tq "$f" >/dev/null 2>&1; then
+              echo "Membuka zip: $f"
+              unzip -q -o "$f"
+            fi
+          done
+
+          S=$(find . -name settings.gradle.kts -not -path "./.git/*" | awk '{print length, $0}' | sort -n | head -n1 | cut -d' ' -f2-)
+
+          if [ -z "$S" ]; then
+            echo "Proyek Gradle tidak ditemukan. Isi repo:"
+            ls -R | head -n 80
+            exit 1
+          fi
+
+          echo "PROJECT_DIR=$(dirname "$S")" >> "$GITHUB_ENV"
+          echo "Proyek ditemukan di: $(dirname "$S")"
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build debug APK
+        run: |
+          cd "$PROJECT_DIR"
+          gradle assembleDebug --stacktrace
+
+      - name: Rename APK
+        run: cp "$PROJECT_DIR/app/build/outputs/apk/debug/app-debug.apk" IP-LAUNCHER-V1.apk
+
+      - name: Upload IP-LAUNCHER-V1.apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: IP-LAUNCHER-V1
+          path: IP-LAUNCHER-V1.apk
+          if-no-files-found: error

@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <a href="GANTI_DENGAN_LINK_RILIS">
+  <a href="https://github.com/hesti2014arie-rgb/Iphone-launcher-/releases/tag/Launcher">
     <img src="https://img.shields.io/badge/⬇️_DOWNLOAD-IP--LAUNCHER--V1.apk-6C3CE9?style=for-the-badge&logo=android&logoColor=white" alt="Download APK">
   </a>
 </p>
